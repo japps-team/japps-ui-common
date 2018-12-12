@@ -3,12 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/util/Resources.java</file>
             <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Panel.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/action/DropActionListener.java</file>
             <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/util/Util.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Label.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/IDraggable.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/util/Dnd.java</file>
+            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/util/Sound.java</file>
+            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Dialogs.java</file>
         </group>
     </open-files>
 </project-private>
