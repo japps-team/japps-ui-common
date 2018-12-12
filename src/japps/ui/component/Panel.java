@@ -106,11 +106,28 @@ public class Panel extends JComponent implements japps.ui.component.IComponent, 
     }
 
     /**
-     * Set the components in this Panel
-     *
+     * Set the components in this Panel<br/>
+     *<br/>
+     * You can add constraints for every column and every row<br/>
+     * <br/>
+     * columnConstraint must have the same count of elements as columns in the comp matrix<br/>
+     * Every columnConstraint value must have the constraints, example:<br/>
+     * <br/>
+     * columnConstraint[0] = Panel.FILL_GROW_CENTER<br/>
+     * columnConstraint[1] = Panel.CENTER<br/>
+     * columnConstraint[2] = Panel.GROW + "," + Panel.CENTER<br/>
+     * columnConstraint[3] = Panel.CENTER + "," + "width 10:20:40"   //minimum:preferred:maximum size<br/>
+     * <br/>
+     * rowConstraints must  have the same count of elements as rows in the comp matrix<br/>
+     * Every element must have the constraints, example:<br/>
+     * <br/>
+     * rowConstraint[0] = Panel.NONE<br/>
+     * rowConstraint[1] = Panel.FILL_GROW_CENTER<br/>
+     * rowConstraint[2] = "width 10:20:40".<br/>
+     * 
      * @param comps
-     * @param columnConstraints GROW, GROWX, GROWY,FILL,CENTER, RIGHT
-     * @param rowConstraints TOP, CENTER, BOTTOM
+     * @param columnConstraints 
+     * @param rowConstraints 
      */
     public void setComponents(Component[][] comps, String[] columnConstraints, String[] rowConstraints) {
 

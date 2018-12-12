@@ -17,6 +17,7 @@
 package japps.ui.component;
 
 import japps.ui.DesktopApp;
+import japps.ui.component.action.AbstractKeyListener;
 import japps.ui.util.Resources;
 import java.awt.Color;
 import java.awt.Component;
@@ -25,6 +26,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
@@ -58,6 +60,14 @@ public class Dialogs {
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setLocationByPlatform(true);
         dialog.setBackground(Color.WHITE);
+        dialog.addKeyListener(new AbstractKeyListener(){
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                        dialog.setVisible(false);
+                    }
+                }
+            });
         dialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -164,6 +174,14 @@ public class Dialogs {
             label.setHorizontalTextPosition(Label.CENTER);
             label.setVerticalTextPosition(Label.BOTTOM);
             label.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            addKeyListener(new AbstractKeyListener(){
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                        setVisible(false);
+                    }
+                }
+            });
             setContentPane(label);
         }
         
@@ -205,7 +223,14 @@ public class Dialogs {
                 new String[]{ Panel.RIGHT+","+Panel.GROW, Panel.LEFT+","+Panel.GROW  },
                 new String[]{ Panel.FILL_GROW_CENTER, Panel.NONE  }
             );
-            
+            addKeyListener(new AbstractKeyListener(){
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                        setVisible(false);
+                    }
+                }
+            });
             setContentPane(panel);
             setModal(true);
             setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

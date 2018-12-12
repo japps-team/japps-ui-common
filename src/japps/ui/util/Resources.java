@@ -188,6 +188,10 @@ public class Resources {
     public static Path getSpeech(String text){
         try{
             
+            if(text==null || text.isEmpty()){
+                return null;
+            }
+            
             String l = p("app.language");
             
             if(l.startsWith("es")) l="es-ES";
@@ -197,6 +201,8 @@ public class Resources {
             if(l.startsWith("it")) l="it-IT";    
             
             Path userSpeechPath = Paths.get(System.getProperty("user.home"), ".japps", appName,"speech");
+            
+            text = text.replaceAll("[<][^>]*[>]","");
             
             Log.debug("Creating speech for "+text);
             Log.debug("Directory: "+userSpeechPath);
