@@ -31,6 +31,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
+import java.awt.Dimension;
 
 /**
  *
@@ -43,6 +44,7 @@ public class ComboBox<T> extends ComponentField<T>{
     private List<ComboBoxItem> items;
     private Popup popup;
     private Panel panel;
+    private Panel popupMainPanel;
     private ActionListener action;
     private TextField textField;
     private TextField textFieldSearch;
@@ -74,7 +76,7 @@ public class ComboBox<T> extends ComponentField<T>{
 
         
         button = new Button();
-        button.setAction((e)->{ showPopup(); });
+        button.addActionListener((e)->{ showPopup(); });
         button.setImage(Resources.icon("expand-more.png"),20,20);
         button.setBorder(null);
         iconSearch.setImage(Resources.icon("search.png"),15,15);
@@ -92,7 +94,7 @@ public class ComboBox<T> extends ComponentField<T>{
         });
         
         
-        Panel popupMainPanel = new Panel();
+        popupMainPanel = new Panel();
         popupMainPanel.setBorder(BorderFactory.createEmptyBorder());
         if(searchable){
             popupMainPanel.setComponents(new Component[][]{

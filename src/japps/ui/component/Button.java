@@ -23,6 +23,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BorderFactory;
 
 
 /**
@@ -33,7 +36,7 @@ import java.awt.event.MouseEvent;
  */
 public class Button extends Label{
     
-    private ActionListener action;
+    private List<ActionListener> actionListener;
     private String command;
 
     
@@ -60,50 +63,59 @@ public class Button extends Label{
      */
     public final void _construct(String text, ActionListener action) {
         
-        this.action = action;
+        actionListener = new ArrayList<>();
         
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        //this.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        this.setBorder(new RoundedBorder());
+        this.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        //this.setBorder(new RoundedBorder());
         this.addMouseListener(new AbstractMouseListener(){
             
             @Override
             public void mouseClicked(MouseEvent e) {
                 if(!isEnabled()) return;
-                if(getAction() != null) fireAction(new ActionEvent(e.getSource(), e.getID(), getCommand()));
+                fireActionListener(new ActionEvent(e.getSource(), e.getID(), getCommand()));
             }
         });
         this.addKeyListener(new AbstractKeyListener(){
             @Override
             public void keyReleased(KeyEvent e) {
                 if(!isEnabled()) return;
-                if(getAction() != null) fireAction(new ActionEvent(e.getSource(), e.getID(), getCommand()));
+                fireActionListener(new ActionEvent(e.getSource(), e.getID(), getCommand()));
             }
         });
         
-        this.setAction(action);
         this.setText(text);
+        this.addActionListener(action);
 
     }
     
     /**
-     * Get the action of this button
+     * Get the actions of this button
      * @return 
      */
-    public ActionListener getAction() {
-        return action;
+    public List<ActionListener> getActionListener() {
+        return actionListener;
     }
 
     /**
-     * Set the action of this button
+     * Add actionListener listener
      * @param action 
      */
-    public void setAction(ActionListener action) {
-        this.action = action;
+    public void addActionListener(ActionListener action) {
+        if(action!=null)
+        this.actionListener.add(action);
+    }
+    
+    /**
+     * Removes an actionListener listener
+     * @param action 
+     */
+    public void removeActionListener(ActionListener action){
+        this.actionListener.remove(action);
     }
 
     /**
-     * Set action commando of this button
+     * Set actionListener commando of this button
      * @return 
      */
     public String getCommand() {
@@ -111,15 +123,21 @@ public class Button extends Label{
     }
 
     /**
-     * Get action command of this button
+     * Get actionListener command of this button
      * @param command 
      */
     public void setCommand(String command) {
         this.command = command;
     }
     
-    protected void fireAction(ActionEvent e){
-        getAction().actionPerformed(e);
+    /**
+     * Fires all actionListener listeners
+     * @param e 
+     */
+    protected void fireActionListener(ActionEvent e){
+        for(ActionListener l: actionListener){
+            l.actionPerformed(e);
+        }
     }
     
 

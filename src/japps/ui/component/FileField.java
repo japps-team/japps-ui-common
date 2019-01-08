@@ -55,7 +55,7 @@ public class FileField extends ComponentField<File>{
         this.setLayout(layout);
         textField = new TextField();
         button = new Button();
-        button.setAction((e) -> { showFileChooser(getFiles(), FileField.this); });
+        button.addActionListener((e) -> { showFileChooser(getFiles(), FileField.this); });
         button.setImage(Resources.icon("folder-open.png"),15,15);
         button.setSize(20, 20);
         

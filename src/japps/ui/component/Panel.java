@@ -49,33 +49,16 @@ public class Panel extends JComponent implements japps.ui.component.IComponent, 
     public static final String FILL_GROW_CENTER = FILL +","+GROW+","+CENTER;
 
     Component[][] components;
-    private TitledBorder border;
+    //private TitledBorder border;
     
     private DropActionListener dropAction;
 
     public Panel() {
         this.setLayout(new MigLayout());
-        this.border = new TitledBorder("");
-        this.setBorder(border);
+        //this.border = new TitledBorder("");
+        //this.setBorder(border);
     }
 
-    /**
-     * Get the name of the contained group of elements
-     *
-     * @return
-     */
-    public String getGroupName() {
-        return border.getTitle();
-    }
-
-    /**
-     * Set the name of the contained group of elements
-     *
-     * @param groupName
-     */
-    public void setGroupName(String groupName) {
-        this.border.setTitle(groupName);
-    }
 
 
     /**

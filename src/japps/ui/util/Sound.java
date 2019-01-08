@@ -16,11 +16,26 @@
  */
 package japps.ui.util;
 
+import japps.ui.component.Dialogs;
+import japps.ui.component.Label;
+import static japps.ui.util.Resources.$;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 
 /**
  * 
@@ -31,6 +46,7 @@ import javax.sound.sampled.DataLine;
 public class Sound {
     
     private static Clip clip;
+    private static JDialog dialog;
     
     /**
      * Plays a sound in specified path
@@ -50,6 +66,35 @@ public class Sound {
         clip.start();
     }
     
+    public static void playInWindow(Path sound) {
+        try {
+            if (dialog == null) {
+                URL imageURL = Resources.class.getResource("/res/img/audio-spectrum.gif");
+                ImageIcon image = new ImageIcon(imageURL);
+                Label label = new Label();
+                label.setIcon(image);
+                dialog = Dialogs.create(label, $("Talking"), true, (e) -> {
+                    stop();
+                });
+                dialog.setBackground(Color.black);
+            }
+            play(sound);
+            clip.addLineListener(new LineListener() {
+
+                @Override
+                public void update(LineEvent event) {
+                    if (event.getType() == LineEvent.Type.STOP) {
+                        dialog.setVisible(false);
+                    }
+                }
+            });
+            dialog.pack();
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            Log.debug("Error playing sound", e);
+        }
+    }
+    
     /**
      * Stops the current song if exists and if playing
      */
@@ -59,6 +104,8 @@ public class Sound {
             clip.close();
         }
     }
+    
+    
     
 
 }

@@ -34,8 +34,8 @@ public abstract class ComponentField<V> extends JComponent implements IComponent
     
     public ComponentField() {
         this.setBorder(new RoundedBorder());
-        this.setMinimumSize(new Dimension(20, 20));
-        this.setPreferredSize(new Dimension(100, 30));
+        this.setMinimumSize(new Dimension(35, 35));
+        this.setPreferredSize(new Dimension(100, 35));
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     }
     

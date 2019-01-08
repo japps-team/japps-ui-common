@@ -29,7 +29,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 
@@ -41,6 +43,7 @@ public class Dialogs {
     
     private static MessageDialog messageDialog;
     private static QuestionDialog questionDialog;
+    private static JDialog waitingDialog;
     
     public static final int APPROVE = 1;
     public static final int CANCEL  = 2;
@@ -65,6 +68,12 @@ public class Dialogs {
                 public void keyReleased(KeyEvent e) {
                     if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
                         dialog.setVisible(false);
+                        WindowListener[] listeners = dialog.getWindowListeners();
+                        if(listeners != null){
+                            for(WindowListener l : listeners){
+                                l.windowClosing(new WindowEvent(dialog, 0));
+                            }
+                        }
                     }
                 }
             });
@@ -140,6 +149,42 @@ public class Dialogs {
     public static int question(String title, String content){
         Image image = Resources.icon("help.png",100,100);
         return question(title, content, image);
+    }
+    
+    /**
+     * Shows a waiting splash
+     * @param message 
+     */
+    public static void showWaiting(String message){
+        if(waitingDialog == null){
+            waitingDialog = new JDialog();
+            waitingDialog.setBackground(Color.WHITE);
+            waitingDialog.setUndecorated(true);
+            waitingDialog.setOpacity(0.6f);
+            waitingDialog.setSize(270,290);
+            waitingDialog.setAlwaysOnTop(true);
+            waitingDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+            
+            
+            Label label = new Label();
+            ImageIcon icon = new ImageIcon(Dialogs.class.getResource("/res/img/wait.gif"));
+            label.setIcon(icon);
+            label.setText(message);
+            label.setHorizontalTextPosition(Label.CENTER);
+            label.setVerticalTextPosition(Label.BOTTOM);
+            waitingDialog.setContentPane(label);
+        }
+        center(waitingDialog);
+        waitingDialog.setVisible(true);
+    }
+    
+    /**
+     * Hides the waiting splash
+     */
+    public static void hideWaiting(){
+        if(waitingDialog!=null){
+            waitingDialog.setVisible(false);
+        }
     }
     
     /**

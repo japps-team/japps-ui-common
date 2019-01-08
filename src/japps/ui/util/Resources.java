@@ -18,6 +18,7 @@ package japps.ui.util;
 
 
 
+import japps.ui.component.Dialogs;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
@@ -48,8 +49,9 @@ public class Resources {
     
     public static Path getUserAppPath() throws IOException{
         Path userAppPath = Paths.get(System.getProperty("user.home"), ".japps", appName);
+        Path homeResources = userAppPath.resolve("res");
 
-        if (!Files.exists(userAppPath)) {
+        if (!Files.exists(homeResources)) {
             Log.debug("Creationg userAppPath: "+userAppPath);
             Path sharedConfigDir = Paths.get("res");
             if (!Files.exists(sharedConfigDir)) {
@@ -169,11 +171,16 @@ public class Resources {
      * Speech a text
      * @param text 
      */
-    public static void speech(String text) {
+    public static void speech(String text, boolean showWindow) {
         try {
             Path speech = Resources.getSpeech(text);
             if (speech != null && Files.exists(speech)) {
-                Sound.play(speech);
+                
+                if(showWindow){
+                    Sound.playInWindow(speech);
+                }else{
+                    Sound.play(speech);
+                }
             }
         } catch (Exception e) {
             Log.debug("Cant speech text: "+text);
@@ -256,9 +263,9 @@ public class Resources {
             switch(args[0]){
                 case "reconfigure":
                     try{
-                        FileUtils.deleteFileOrDirectory(Paths.get(System.getProperty("user.home"), ".japps", appName));
+                        FileUtils.deleteFileOrDirectory(Paths.get(System.getProperty("user.home"), ".japps", appName,"res"));
                     }catch(Exception err){
-                        Log.debug("Cant delete directory "+Paths.get(System.getProperty("user.home"), ".japps", appName), err);
+                        Log.debug("Cant delete directory "+Paths.get(System.getProperty("user.home"), ".japps", appName,"res"), err);
                     }
                     break;
             }
@@ -371,8 +378,13 @@ public class Resources {
         }
     }
     
-    
-    
+    /**
+     * Gets the properties objet with all the config 
+     * @return 
+     */
+    public static Properties getConfigProperties(){
+        return config;
+    }
     
     
 }

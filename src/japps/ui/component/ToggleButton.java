@@ -30,14 +30,14 @@ import javax.swing.JLabel;
  *
  * @author Williams Lopez - JApps
  */
-public class ToggleButton extends Button{
+public class ToggleButton extends Button implements ISelectable{
     
     private boolean selected;
     
     
-    private Image markSelected = null;
+    private Image markSelection = null;
     
-
+    
     public ToggleButton(ActionListener action) {
         super(action);
         build();
@@ -57,39 +57,41 @@ public class ToggleButton extends Button{
 
     private void build(){
         //setOpaque(true);
-        markSelected = Resources.icon("done.png");
-       // markSelected = Util.readImage("/home/fernando/NetBeansProjects/japps-ui-common-test/res/img/great.png");
-        
+        markSelection = Resources.icon("done.png");
+       // markSelection = Util.readImage("/home/fernando/NetBeansProjects/japps-ui-common-test/res/img/great.png");
                 
     }
     
     @Override
     protected void paintComponent(Graphics g) {
+        int w=5, h=5;
+        int x=0, y=0;
+        //Calculating width and height
+        if (markSelection != null) {
+            double factor = 1;
+            if (getWidth() > getHeight()) {
+                factor = (getHeight() / (double) markSelection.getHeight(this)) / 5;
+            } else {
+                factor = (getWidth() / (double) markSelection.getWidth(this)) / 5;
+            }
+            w = (int) (factor * (double) markSelection.getWidth(this));
+            h = (int) (factor * (double) markSelection.getHeight(this));
+
+            w = w < 15 ? 15 : w;
+            h = h < 15 ? 15 : h;
+            
+            x = getWidth()-getInsets().right-w;
+            y = getInsets().top;
+
+            g.clearRect(x, y, w, h);
+        }
+
         super.paintComponent(g);
 
-        if (!isSelected()) {
-            return;
+        if(markSelection != null && isSelected()){
+            Image image = markSelection.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+            g.drawImage(image,x , y, w, h, this);
         }
-        if(markSelected == null){
-            return;
-        }
-        double factor = 1;
-        int w, h;
-        if(getWidth()> getHeight()){
-            factor = (getHeight()/(double)markSelected.getHeight(this))/5;
-        }else{
-            factor = (getWidth()/(double)markSelected.getWidth(this))/5;
-        }
-        w = (int)(factor*(double)markSelected.getWidth(this));
-        h = (int)(factor*(double)markSelected.getHeight(this));
-        
-        w = w<2?w=2:w;
-        h = h<2?h=2:h;
-        
-        Image image = markSelected.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-        
-        g.drawImage(image, getWidth()-getInsets().right-5-w, getInsets().top+5, w, h, this);
-        //g.fillRect(0, 0, w, h);
 
     }
 
@@ -98,6 +100,7 @@ public class ToggleButton extends Button{
      * Wether this component is selected or not
      * @return 
      */
+    @Override
     public boolean isSelected() {
         return selected;
     }
@@ -106,15 +109,16 @@ public class ToggleButton extends Button{
      * Set this component state to selected
      * @param selected 
      */
+    @Override
     public void setSelected(boolean selected) {
         this.selected = selected;
         this.repaint();
     }
 
     @Override
-    protected void fireAction(ActionEvent e) {
+    protected void fireActionListener(ActionEvent e) {
         setSelected(!selected);
-        super.fireAction(e);
+        super.fireActionListener(e);
     }
 
     @Override
@@ -130,5 +134,23 @@ public class ToggleButton extends Button{
         }
     }
 
+    /**
+     * Gets the image mark for this component when is selected
+     * @return 
+     */
+    public Image getMarkSelection() {
+        return markSelection;
+    }
+
+    /**
+     * Get the image mark showed when this component is selected
+     * @param markSelection 
+     */
+    public void setMarkSelection(Image markSelection) {
+        this.markSelection = markSelection;
+    }
     
+    
+
+   
 }

@@ -60,7 +60,11 @@ public class Label extends JLabel implements IComponent, IDraggable{
      * @param h 
      */
     public void setImage(Image img, int w, int h){
-        setImage(img.getScaledInstance(w, h, Image.SCALE_SMOOTH));
+        Image simg = null;
+        if(img != null){
+            simg = img.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        }
+        setImage(simg);
     }
     
     
