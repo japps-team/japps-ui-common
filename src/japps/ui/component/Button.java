@@ -18,14 +18,21 @@ package japps.ui.component;
 
 import japps.ui.component.action.AbstractKeyListener;
 import japps.ui.component.action.AbstractMouseListener;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.KeyStroke;
+import javax.swing.text.DefaultEditorKit;
 
 
 /**
@@ -36,7 +43,6 @@ import javax.swing.BorderFactory;
  */
 public class Button extends Label{
     
-    private List<ActionListener> actionListener;
     private String command;
 
     
@@ -63,7 +69,9 @@ public class Button extends Label{
      */
     public final void _construct(String text, ActionListener action) {
         
-        actionListener = new ArrayList<>();
+        this.setFocusable(true);
+        this.setRequestFocusEnabled(true);
+        
         
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         this.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
@@ -72,6 +80,7 @@ public class Button extends Label{
             
             @Override
             public void mouseClicked(MouseEvent e) {
+                requestFocusInWindow();
                 if(!isEnabled()) return;
                 fireActionListener(new ActionEvent(e.getSource(), e.getID(), getCommand()));
             }
@@ -80,7 +89,22 @@ public class Button extends Label{
             @Override
             public void keyReleased(KeyEvent e) {
                 if(!isEnabled()) return;
-                fireActionListener(new ActionEvent(e.getSource(), e.getID(), getCommand()));
+                if(e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE){
+                    fireActionListener(new ActionEvent(e.getSource(), e.getID(), getCommand()));
+                }
+            }
+        });
+        
+        this.addFocusListener(new FocusListener() {
+
+            @Override
+            public void focusGained(FocusEvent e) {
+                setBorder(BorderFactory.createLineBorder(Color.gray, 1, true));
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                setBorder(BorderFactory.createEmptyBorder());
             }
         });
         
@@ -93,8 +117,8 @@ public class Button extends Label{
      * Get the actions of this button
      * @return 
      */
-    public List<ActionListener> getActionListener() {
-        return actionListener;
+    public ActionListener[] getActionListener() {
+        return this.listenerList.getListeners(ActionListener.class);
     }
 
     /**
@@ -103,7 +127,7 @@ public class Button extends Label{
      */
     public void addActionListener(ActionListener action) {
         if(action!=null)
-        this.actionListener.add(action);
+        this.listenerList.add(ActionListener.class, action);
     }
     
     /**
@@ -111,7 +135,7 @@ public class Button extends Label{
      * @param action 
      */
     public void removeActionListener(ActionListener action){
-        this.actionListener.remove(action);
+        this.listenerList.remove(ActionListener.class, action);
     }
 
     /**
@@ -134,8 +158,8 @@ public class Button extends Label{
      * Fires all actionListener listeners
      * @param e 
      */
-    protected void fireActionListener(ActionEvent e){
-        for(ActionListener l: actionListener){
+    public void fireActionListener(ActionEvent e){
+        for(ActionListener l: listenerList.getListeners(ActionListener.class)){
             l.actionPerformed(e);
         }
     }

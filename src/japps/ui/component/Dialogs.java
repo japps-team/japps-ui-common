@@ -56,12 +56,17 @@ public class Dialogs {
      * @return 
      */
     public static JDialog create(JComponent content, String title,boolean modal, ActionListener closingAction){
-        JDialog dialog = new JDialog(DesktopApp.APP.getMainWindow());
+        JDialog dialog = new JDialog(DesktopApp.APP.getMainWindow()){
+            @Override
+            public void pack() {
+                super.pack();
+                center(this);
+            }
+        };
         dialog.setModal(modal);
         dialog.setContentPane(content);
         dialog.setTitle(title);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setLocationByPlatform(true);
         dialog.setBackground(Color.WHITE);
         dialog.addKeyListener(new AbstractKeyListener(){
                 @Override
@@ -83,13 +88,7 @@ public class Dialogs {
                 if(closingAction!=null){
                     closingAction.actionPerformed(new ActionEvent(e.getSource(), e.getID(), "closing"));
                 }
-            }
-
-            @Override
-            public void windowOpened(WindowEvent e) {
-                center(dialog);
-            }
-            
+            }            
         });
         return dialog;
     }
@@ -227,7 +226,23 @@ public class Dialogs {
                     }
                 }
             });
+            setPreferredSize(new Dimension(600, 500));
+            label.setMaximumSize(getMaximumSize());
             setContentPane(label);
+            addKeyListener(new AbstractKeyListener(){
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                        setVisible(false);
+                        WindowListener[] listeners = getWindowListeners();
+                        if(listeners != null){
+                            for(WindowListener l : listeners){
+                                l.windowClosing(new WindowEvent(MessageDialog.this, 0));
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         public void show(String title, String content, Image image){
@@ -281,6 +296,7 @@ public class Dialogs {
             setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             setLocationByPlatform(true);
             setBackground(Color.WHITE);
+            setMaximumSize(new Dimension(800, 600));
             
         }
         

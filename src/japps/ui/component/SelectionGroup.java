@@ -28,8 +28,10 @@ import java.util.List;
  */
 public class SelectionGroup{
     
+    private boolean disabled = false;
     private List<ISelectable> elements;
     private SelectionListenerGroup listenerGroup;
+    private ISelectable selected;
 
     /**
      * Creates a new Selection group
@@ -45,7 +47,7 @@ public class SelectionGroup{
      */
     public void add(ISelectable selectable){
         elements.add(selectable);
-        selectable.addActionListener(listenerGroup);
+        selectable.addSelectStateListener(listenerGroup);
     }
     
     /**
@@ -54,20 +56,56 @@ public class SelectionGroup{
      */
     public void remove(ISelectable selectable){
         elements.remove(selectable);
-        selectable.removeActionListener(listenerGroup);
+        selectable.removeSelectStateListener(listenerGroup);
     }
     
-    class SelectionListenerGroup implements ActionListener{
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            System.out.println("selection group fired");
-            for(ISelectable s : elements){
-                if(e.getSource() != s){
+    /**
+     * Remove all elements in group
+     */
+    public void removeAll(){
+        if(elements.isEmpty()) return;
+        ISelectable[] array = new ISelectable[elements.size()];
+        array = elements.toArray(array);
+        for(ISelectable s: array){
+            remove(s);
+        }
+    }
+    
+    /**
+     * Gets the current selected component in this group
+     * @return 
+     */
+    public ISelectable getSelected(){
+        return this.selected;
+    }
+    
+    /**
+     * Set the selected value in this group
+     * @param selected
+     */
+    public void setSelected(ISelectable selected) {
+        this.disabled = true;
+        try {
+            this.selected = selected;
+            for (ISelectable s : elements) {
+                if (selected != s) {
                     s.setSelected(false);
-                }else{
+                } else {
                     s.setSelected(true);
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        this.disabled = false;
+    }
+    
+    class SelectionListenerGroup implements ISelectable.SelectStateListener{
+
+        @Override
+        public void state(ActionEvent e) {
+            if(!disabled){
+                setSelected((ISelectable)e.getSource());
             }
         }
 

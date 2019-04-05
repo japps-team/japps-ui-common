@@ -16,9 +16,11 @@
  */
 package japps.ui.util;
 
+import japps.ui.DesktopApp;
 import japps.ui.component.IDraggable;
 import japps.ui.component.action.DropActionListener;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.MouseInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +29,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 /**
@@ -37,14 +40,15 @@ public class Dnd {
 
     public static final int DRAGGABLE = 1;
     public static final int DROPPABLE = 2;
+    public static final int BOTH = 4;
     public static final int NONE = 3;
 
     public static JComponent DRAGGED = null;
     public static JComponent OVER = null;
-    private static final JFrame frame;
+    private static final JDialog frame;
 
     static {
-        frame = new JFrame();
+        frame = new JDialog(DesktopApp.APP.getMainWindow());
         frame.setUndecorated(true);
         frame.setAlwaysOnTop(true);
         frame.setOpacity(0.7f);
@@ -60,6 +64,7 @@ public class Dnd {
         switch(mode){
             case DROPPABLE: droppable(comp); break;
             case DRAGGABLE: draggable(comp); break;
+            case BOTH: droppable(comp); draggable(comp); break;
             case NONE: removeAdapters(comp); break;
         }
     }
@@ -112,7 +117,7 @@ public class Dnd {
             DndDropableAdapter adapter = new DndDropableAdapter(comp);
             comp.addMouseListener(adapter);
             comp.addMouseMotionListener(adapter);
-
+            comp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
     }
 
@@ -148,6 +153,9 @@ public class Dnd {
 
         @Override
         public void mouseDragged(MouseEvent e) {
+            
+            comp.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+            
             DRAGGED = comp;
             frame.setSize(comp.getSize());
             frame.setLocation(MouseInfo.getPointerInfo().getLocation());
@@ -166,6 +174,13 @@ public class Dnd {
 
         @Override
         public void mouseReleased(MouseEvent e) {
+            if(DRAGGED != null){
+                DRAGGED.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+            if(OVER!=null){
+                OVER.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+            comp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             drop();
         }
 
@@ -180,15 +195,19 @@ public class Dnd {
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseEntered(MouseEvent e) {        
             if (e.getModifiersEx() == MouseEvent.BUTTON1_DOWN_MASK) {
-                Dnd.OVER = comp;
+                if(DRAGGED != comp){
+                    comp.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                    Dnd.OVER = comp;
+                }
             }
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
             if (e.getModifiersEx() == MouseEvent.BUTTON1_DOWN_MASK) {
+                comp.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 Dnd.OVER = null;
             }
         }

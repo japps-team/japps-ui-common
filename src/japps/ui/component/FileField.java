@@ -16,13 +16,18 @@
  */
 package japps.ui.component;
 
+import japps.ui.component.action.TransferActionListener;
 import japps.ui.util.Resources;
 import java.io.File;
 import static japps.ui.util.Resources.*;
+import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileFilter;
 
 /**
  *
@@ -33,7 +38,8 @@ public class FileField extends ComponentField<File>{
     private List<File> files;
     private TextField textField;
     private static JFileChooser fileChooser = new JFileChooser();
-    private Button button;
+    private Button button; 
+    private Button btnDelete;
     
     
     private int mode;
@@ -51,22 +57,74 @@ public class FileField extends ComponentField<File>{
 
     public FileField(int mode, int type) {
         super();
+        files = new ArrayList<>();
         BoxLayout layout = new BoxLayout(this, BoxLayout.X_AXIS);
         this.setLayout(layout);
-        textField = new TextField();
+        textField = createTextField(mode);
         button = new Button();
         button.addActionListener((e) -> { showFileChooser(getFiles(), FileField.this); });
         button.setImage(Resources.icon("folder-open.png"),15,15);
         button.setSize(20, 20);
         
+        btnDelete = new Button();
+        btnDelete.setImage(Resources.icon("delete.png"),15,15);
+        btnDelete.setSize(20, 20);
+        btnDelete.addActionListener((e)->{ setValue(null); });
+        
         textField.setBorder(null);
         button.setBorder(null);
         
+        this.add(btnDelete);
         this.add(textField);
         this.add(button);
-        setMode(mode);
+        
         setType(type);
         
+        TransferActionListener transferableListener = new TransferActionListener(this);
+
+        this.textField.addFocusListener(transferableListener);
+        this.textField.addKeyListener(transferableListener);
+        this.textField.addMouseListener(transferableListener);
+        this.textField.addMouseMotionListener(transferableListener);
+        this.textField.addMouseWheelListener(transferableListener);
+        
+        
+    }
+    
+    /**
+     * Set file extensions
+     * @param extensions 
+     */
+    public void setFileExtensions(String... extensions){
+
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                if(f.isDirectory()){
+                    return true;
+                }
+                for(String ext: extensions){
+                    
+                    if(ext == null  || f == null || f.getName() == null){
+                        continue;
+                    }
+                    
+                    if(ext.equals("*")){
+                        return true;
+                    }
+                    
+                    if(f.getName().toLowerCase().endsWith("."+ext.toLowerCase())){
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public String getDescription() {
+                return Arrays.toString(extensions);
+            }
+        });
     }
     
 
@@ -149,6 +207,11 @@ public class FileField extends ComponentField<File>{
         }
         
     }
+    
+    private void refreshTextField(){
+        this.textField.setValue("");
+        this.files.forEach((f)->{ this.textField.append(f.getName()+";");  });
+    }
 
     /**
      * Get the mode
@@ -174,15 +237,39 @@ public class FileField extends ComponentField<File>{
      * FileField.MODE_FILES_AND_DIRS = 5;
      * @param mode 
      */
-    public void setMode(int mode){
+    private TextField createTextField(int mode){
         this.mode = mode;
+        
         switch(mode){
-            case MODE_FILE_SINGLE: this.textField.setMultiline(false); break;
-            case MODE_FILE_MULTIPLE: this.textField.setMultiline(true); this.textField.setEditable(false); break;
-            case MODE_DIRECTORY_SINGLE: this.textField.setMultiline(false);  break;
-            case MODE_DIRECTORY_MULTIPLE: this.textField.setMultiline(true); this.textField.setEditable(false); break;
-            case MODE_FILES_AND_DIRS: this.textField.setMultiline(true); this.textField.setEditable(false); break;       
+            case MODE_FILE_SINGLE: 
+                this.textField = new TextField();
+                this.setMaximumSize(new Dimension(100000, 35));
+                break;
+            case MODE_FILE_MULTIPLE: 
+                this.textField = new TextField(true);
+                this.textField.setLineWrap(true);
+                this.setMaximumSize(new Dimension(100000, 100000));
+                break;
+            case MODE_DIRECTORY_SINGLE: 
+                this.textField = new TextField();
+                this.setMaximumSize(new Dimension(100000, 35));
+                break;
+            case MODE_DIRECTORY_MULTIPLE: 
+                this.textField = new TextField(true);
+                this.textField.setLineWrap(true);
+                this.setMaximumSize(new Dimension(100000, 100000));
+                break;
+            case MODE_FILES_AND_DIRS: 
+                this.textField = new TextField(true);
+                this.textField.setLineWrap(true);
+                this.setMaximumSize(new Dimension(100000, 100000));
+                break;
+            default:
+                throw new RuntimeException("Unsuported mode "+mode);
         }
+        this.textField.setEditable(false);
+        
+        return this.textField;
     }
 
     /**
@@ -206,23 +293,39 @@ public class FileField extends ComponentField<File>{
     }
     
     
-    
+    /**
+     * Get the selected files in this component
+     * @return 
+     */
     public List<File> getFiles(){
         return this.files;
     }
     
+    /**
+     * Set the selected files in this component
+     * @param files 
+     */
     public void setFiles(List<File> files){
-        this.files = files;
-        this.textField.setValue("");
-        this.files.forEach((f)->{ this.textField.append(f.getName()+(this.textField.isMultiline()?"\n":""));  });
+        this.files.clear();
+        this.files.addAll(files);
+        this.refreshTextField();
     }
     
+    /**
+     * Set the selected file in this file component
+     * @param value 
+     */
     @Override
     public void setValue(File value) {
+        
         files.clear();
-        files.add(value);
-        setFiles(files);
+        if(value != null){
+            files.add(value);
+        }
+        this.refreshTextField();
     }
+    
+    
 
     @Override
     public File getValue() {

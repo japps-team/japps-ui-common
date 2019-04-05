@@ -22,6 +22,8 @@ import japps.ui.util.Log;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,7 +74,9 @@ public class DesktopApp{
         this.fullscreen = fullscreen;
         if(this.fullscreen){
             mainWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-            //mainWindow.setUndecorated(true);
+            mainWindow.setUndecorated(true);
+            GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+            device.setFullScreenWindow(mainWindow);
         }else{
             mainWindow.setExtendedState(JFrame.NORMAL); 
             mainWindow.setUndecorated(false);

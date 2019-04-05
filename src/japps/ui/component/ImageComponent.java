@@ -39,6 +39,9 @@ public class ImageComponent extends JComponent implements IComponent{
     private boolean scalableImage = true;
     private boolean proportionalScaling = true;
     private Insets insets;
+    private int lastW, lastH;
+    private Image lastScaled;
+            
     
     public ImageComponent(){
         setBorder(BorderFactory.createEmptyBorder());
@@ -60,8 +63,15 @@ public class ImageComponent extends JComponent implements IComponent{
                 if(h <= 0) h = 5;
                 w = Math.round(w * scaleFactor);
                 h = Math.round(h * scaleFactor);
+                if(w == lastW && h == lastH){
+                    scaled = lastScaled;
+                }else{
+                    scaled = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+                    lastScaled = scaled;
+                    lastW = w;
+                    lastH = h;
+                }
                 
-                scaled = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
             }
             g.drawImage(scaled, getInsets().left, getInsets().top, this);
         }
@@ -100,6 +110,10 @@ public class ImageComponent extends JComponent implements IComponent{
      */
     public void setImage(Image image) {
         this.image = image;
+        this.lastScaled = null;
+        this.lastH = -1;
+        this.lastW = -1;
+                
         try {
             getGraphics().clearRect(0, 0, getWidth(), getHeight());
         } catch (Exception e) {

@@ -18,6 +18,7 @@ package japps.ui.component;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventListener;
 
 
 /**
@@ -25,9 +26,9 @@ import java.awt.event.ActionListener;
  * @author Williams Lopez - JApps
  */
 public interface ISelectable {
-    
+        
     /**
-     * Sets wether this component is selected or not
+     * Sets whether this component is selected or not
      * @param b 
      */
     public void setSelected(boolean b);
@@ -42,13 +43,22 @@ public interface ISelectable {
      * Adds an action listener
      * @param listener 
      */
-    public void addActionListener(ActionListener listener);
+    public void addSelectStateListener(SelectStateListener listener);
     
     /**
      * Removes action listener
      * @param listener 
      */
-    public void removeActionListener(ActionListener listener);
+    public void removeSelectStateListener(SelectStateListener listener);
+    
+    /**
+     * Listener for ISelectable components to watch when select state changes
+     */
+    public static interface SelectStateListener extends EventListener{
+        
+        public void state(ActionEvent e);
+        
+    }
     
     
 }

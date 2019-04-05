@@ -16,6 +16,7 @@
  */
 package japps.ui.component;
 
+import japps.ui.component.action.TransferActionListener;
 import japps.ui.util.Resources;
 import java.awt.Color;
 import javax.swing.ImageIcon;
@@ -42,6 +43,14 @@ public class DateField<Date> extends ComponentField{
         picker.getFormattedTextField().setBorder(new EmptyBorder(0,0, 0,0));
         picker.getFormattedTextField().setBackground(Color.white);
         this.add(picker);
+        
+        TransferActionListener transferableListener = new TransferActionListener(this);
+        this.picker.addFocusListener(transferableListener);
+        this.picker.addKeyListener(transferableListener);
+        this.picker.addMouseListener(transferableListener);
+        this.picker.addMouseMotionListener(transferableListener);
+        this.picker.addMouseWheelListener(transferableListener);
+        
     }
     
 

@@ -28,20 +28,40 @@ import javax.swing.border.TitledBorder;
  * @author Williams Lopez - JApps
  */
 public class RoundedBorder extends LineBorder{
+    
+    Component comp;
+    
+    private Insets borderInsets = new Insets(5, 5, 5, 5);
 
-    public RoundedBorder() {
+    public RoundedBorder(Component comp) {
         super(Color.lightGray, 1, true);
+        this.comp = comp;
     }
 
     @Override
     public Insets getBorderInsets(Component c) {
-        return new Insets(5, 5, 5, 5);
+        return borderInsets;
+    }
+    
+    public void setBorderInsets(Insets insets) {
+        this.borderInsets = insets;
     }
 
     @Override
     public boolean isBorderOpaque() {
         return true;
     }
+
+    @Override
+    public Color getLineColor() {
+        return this.lineColor;
+    }
+
+    public void setLineColor(Color lineColor) {
+        this.lineColor = lineColor;
+    }
+    
+    
     
     
 }

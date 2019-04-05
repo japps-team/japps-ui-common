@@ -45,6 +45,10 @@ public class Label extends JLabel implements IComponent, IDraggable{
 
     public Label(String text) {
         super(text);
+        setVerticalTextPosition(CENTER);
+        setVerticalAlignment(CENTER);
+        setHorizontalTextPosition(CENTER);
+        setHorizontalAlignment(CENTER);
     }
 
     public Label() {

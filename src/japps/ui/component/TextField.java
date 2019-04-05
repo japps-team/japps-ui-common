@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
@@ -39,7 +40,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EventListener;
 import java.util.EventObject;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -53,32 +56,69 @@ import sun.font.FontManagerFactory;
  */
 public class TextField extends ComponentField<String> {
 
+    public static final int PASSWORD = 3;
+    public static final int TEXT_AREA = 2;
+    public static final int TEXT_FIELD = 1;
+    
     JScrollPane scroll;
-    JTextArea component;
-    boolean multiline;
+    JTextComponent component;
+    boolean multiline = false;
     private TransferActionListener transferableListener;
 
-    public TextField() {
+    public TextField(){
+        build(TEXT_FIELD);
+    }
+    
+    public TextField(boolean multiline) {
         super();
-        this.component = new TextComponent();
+        build(TEXT_AREA);
+    }
+    
+    public TextField(int type){
+        build(type);
+    }
+    
+    private void build(int type){
+        this.multiline = type == TEXT_AREA;
+        
+        switch(type){
+            case TEXT_AREA: 
+                this.scroll = new JScrollPane();
+                this.component = new TextComponentArea();
+                scroll.setViewportView(this.component);
+                scroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+                scroll.getViewport().setOpaque(false);
+                scroll.setOpaque(false);
+                this.add(scroll);
+                this.setMaximumSize(new Dimension(200000,200000));
+                break;
+            case PASSWORD:
+                this.component = new JPasswordField();
+                this.add(component);
+                break;
+            default:
+                this.component = new TextComponentField();
+                this.add(component);
+                break;
+                
+        }
+        
+        this.component.setEditable(true);
+        
+        this.component.setBorder(BorderFactory.createEmptyBorder());
+        
         this.transferableListener = new TransferActionListener(this);
-        scroll = new JScrollPane();
-
         this.component.addFocusListener(transferableListener);
         this.component.addKeyListener(transferableListener);
         this.component.addMouseListener(transferableListener);
         this.component.addMouseMotionListener(transferableListener);
         this.component.addMouseWheelListener(transferableListener);
-
-        scroll.setViewportView(this.component);
-        scroll.setMinimumSize(new Dimension(10, 40));
-        scroll.setBorder(new EmptyBorder(0, 0, 0, 0));
-        scroll.getViewport().setBackground(Color.white);
-        this.add(scroll);
+        
     }
 
     @Override
     public void setValue(String value) {
+        String old = getValue();
         if (value == null) {
             component.setText("");
         } else {
@@ -91,44 +131,18 @@ public class TextField extends ComponentField<String> {
         return component.getText();
     }
 
-    /**
-     * Set the text field as multiline or not
-     *
-     * @param multiline
-     */
-    public void setMultiline(boolean multiline) {
-        this.multiline = multiline;
-        if (this.multiline) {
-            this.component.setRows(3);
-            remove(component);
-            add(scroll);
-        } else {
-            this.component.setRows(1);
-            remove(scroll);
-            add(component);
-        }
-        repaint();
-    }
-
-    /**
-     * Get if this field is multiline or not
-     *
-     * @return
-     */
-    public boolean isMultiline() {
-        return this.multiline;
-    }
-
+   
     /**
      * Append a string in this textfield
      *
      * @param str
      */
     public void append(String str) {
-        if (this.component instanceof JTextArea) {
-            ((JTextArea) component).append(str);
-        } else {
-            this.component.setText(this.component.getText() + str);
+        String old = getValue();
+        if(multiline){
+            ((TextComponentArea)this.component).append(str);
+        }else{
+            this.component.setText(this.component.getText()+str);
         }
     }
 
@@ -177,7 +191,7 @@ public class TextField extends ComponentField<String> {
 
     @Override
     public JComponent getComponent() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.component;
     }
 
     @Override
@@ -185,25 +199,40 @@ public class TextField extends ComponentField<String> {
         super.setFont(font);
         this.component.setFont(font);
     }
-
-    class TextComponent extends JTextArea {
+    
+    /**
+     * Set line wrape to true or false when this text component is multiline
+     * if it is not multiline then a runtime exception will be launched
+     * @param wrp 
+     */
+    public void setLineWrap(boolean wrp){
+        
+        if(this.component instanceof JTextArea){
+            ((JTextArea)this.component).setLineWrap(wrp);
+        }else{
+            throw new RuntimeException("setLineWrap error: The component is not multiline");
+        }
+        
+    }
+    
+    
+    
+    class TextComponentArea extends JTextArea {
         
         boolean toolTipErased = false;
 
-        public TextComponent() {
+        public TextComponentArea() {
             
             addKeyListener(new KeyAdapter() {
 
                 @Override
                 public void keyReleased(KeyEvent e) {
-                    if(!toolTipErased && !TextComponent.this.getText().equals("")){
-                        System.out.println("clened1");
-                        TextComponent.this.repaint();
+                    if(!toolTipErased && !TextComponentArea.this.getText().equals("")){
+                        TextComponentArea.this.repaint();
                         toolTipErased = true;
                     }
-                    if(toolTipErased && TextComponent.this.getText().equals("")){
-                        System.out.println("clened2");
-                        TextComponent.this.repaint();
+                    if(toolTipErased && TextComponentArea.this.getText().equals("")){
+                        TextComponentArea.this.repaint();
                         toolTipErased = false;
                     }
                 }
@@ -247,7 +276,6 @@ public class TextField extends ComponentField<String> {
                 char c = tooltiptext.charAt(i);
 
                 if (c == '\n') {
-                    System.out.println(line + ":" + new String(buff, 0, count));
                     line++;
                     count = 0;
                 } else if (c == ' ' || c == '\t') {
@@ -262,7 +290,7 @@ public class TextField extends ComponentField<String> {
                     }
                 } else if (i == tooltiptext.length() - 1) {
                     buff[count] = c;
-                    g.drawString(new String(buff,0,count), 2 + getInsets().left , fontHeight*line + fontHeight + 3*line + getInsets().top);
+                    g.drawString(new String(buff,0,count+1), 2 + getInsets().left , fontHeight*line + fontHeight + 3*line + getInsets().top);
                 } else {
                     buff[count] = c;
                     count++;
@@ -272,5 +300,56 @@ public class TextField extends ComponentField<String> {
         }
 
     }
+    
+    
+    
+    class TextComponentField extends JTextField {
+        
+        boolean toolTipErased = false;
+
+        public TextComponentField() {
+            
+            addKeyListener(new KeyAdapter() {
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    if(!toolTipErased && !TextComponentField.this.getText().equals("")){
+                        TextComponentField.this.repaint();
+                        toolTipErased = true;
+                    }
+                    if(toolTipErased && TextComponentField.this.getText().equals("")){
+                        TextComponentField.this.repaint();
+                        toolTipErased = false;
+                    }
+                }
+            });
+            
+        }
+
+        
+        
+
+        @Override
+        protected void paintComponent(Graphics g) {            
+            super.paintComponent(g);
+            if (TextField.this.getValue() != null && !TextField.this.getValue().equals("")) {
+                return;
+            }
+            String tooltiptext = TextField.this.getToolTipText();
+            
+            if(tooltiptext == null || tooltiptext.equals("")){
+                return;
+            }
+            g.setColor(Color.lightGray);
+            g.setFont(TextField.this.getFont());
+            FontMetrics fm = g.getFontMetrics();
+            int fontHeight = fm.getHeight();
+            g.drawString(tooltiptext, getInsets().left , fontHeight + 3 + getInsets().top-3);
+        }
+    }
+
+    
+    
+    
 
 }

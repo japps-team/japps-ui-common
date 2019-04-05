@@ -16,15 +16,14 @@
  */
 package japps.ui.component;
 
-import japps.ui.DesktopApp;
 import japps.ui.util.Resources;
-import japps.ui.util.Util;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventListener;
 import javax.swing.Icon;
-import javax.swing.JLabel;
+import javax.swing.JRadioButton;
 
 /**
  *
@@ -38,14 +37,16 @@ public class ToggleButton extends Button implements ISelectable{
     private Image markSelection = null;
     
     
-    public ToggleButton(ActionListener action) {
-        super(action);
+    public ToggleButton(SelectStateListener action) {
+        super(null);
         build();
+        addSelectStateListener(action);
     }
 
-    public ToggleButton(String text, ActionListener action) {
-        super(text, action);
+    public ToggleButton(String text, SelectStateListener action) {
+        super(text, null);
         build();
+        addSelectStateListener(action);
     }
 
     public ToggleButton() {
@@ -95,7 +96,7 @@ public class ToggleButton extends Button implements ISelectable{
 
     }
 
-
+    
     /**
      * Wether this component is selected or not
      * @return 
@@ -111,16 +112,11 @@ public class ToggleButton extends Button implements ISelectable{
      */
     @Override
     public void setSelected(boolean selected) {
-        this.selected = selected;
-        this.repaint();
+        setSelectedWithoutFiringEvent(selected);
+        fireSelectStateListener(new ActionEvent(this, 0, Boolean.toString(selected)));
     }
 
-    @Override
-    protected void fireActionListener(ActionEvent e) {
-        setSelected(!selected);
-        super.fireActionListener(e);
-    }
-
+   
     @Override
     public void setImage(Image img) {
         if(img == null){
@@ -149,8 +145,43 @@ public class ToggleButton extends Button implements ISelectable{
     public void setMarkSelection(Image markSelection) {
         this.markSelection = markSelection;
     }
-    
-    
 
-   
+    @Override
+    public void fireActionListener(ActionEvent e) {
+        setSelected(!selected);
+        super.fireActionListener(e);
+    }
+    
+    /**
+     * Set this component to selected without firing select event
+     * @param selected 
+     */
+    public void setSelectedWithoutFiringEvent(boolean selected){
+        this.selected = selected;
+        this.repaint();
+    }
+
+    @Override
+    public void addSelectStateListener(SelectStateListener listener) {
+        listenerList.add(SelectStateListener.class, listener);
+    }
+
+    @Override
+    public void removeSelectStateListener(SelectStateListener listener) {
+        listenerList.remove(SelectStateListener.class, listener);
+    }
+    
+    public SelectStateListener[] getSelectStateListener(){
+        return listenerList.getListeners(SelectStateListener.class);
+    }
+    
+    public void fireSelectStateListener(ActionEvent e){
+        SelectStateListener[] list = getSelectStateListener();
+        for(SelectStateListener l : list){
+            l.state(e);
+        }
+    }
+    
+    
+    
 }

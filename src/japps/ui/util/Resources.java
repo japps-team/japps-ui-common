@@ -57,18 +57,6 @@ public class Resources {
             if (!Files.exists(sharedConfigDir)) {
                 try {
                     Log.debug("You have not defined a res directory, creating");
-                    /*
-                    Path configFile = Paths.get(Resources.class.getResource("/res/config/default.properties").toURI());
-                    Path langFile = Paths.get(Resources.class.getResource("/res/lang/lang.properties").toURI());
-                    Path config = Paths.get("res","config");
-                    Path lang   = Paths.get("res","lang");
-                    
-                    Files.createDirectories(config);
-                    Files.createDirectories(lang);
-                    
-                    FileUtils.copy(configFile, config);
-                    FileUtils.copy(langFile, lang);
-                    */
                     Path resJar = Paths.get(Resources.class.getResource("/res").toURI());
                     Path resDir = Paths.get("res").toAbsolutePath().getParent();
                     Files.createDirectories(resDir);
@@ -92,6 +80,16 @@ public class Resources {
      * @return 
      */
     public static String $(String textKey){
+        
+        if(textKey == null){
+            return null;
+        }
+        
+        String clean = textKey.trim();
+        if(clean.startsWith("$(") && clean.endsWith(")")){
+            textKey = clean.substring(2, clean.length()-1);
+        }
+        
         if(lang.containsKey(textKey)){
             return lang.getProperty(textKey);
         }
@@ -106,7 +104,17 @@ public class Resources {
      */
     public static String p(String propertyKey){
         if(config.containsKey(propertyKey)){
-            return config.getProperty(propertyKey);
+            
+            String p = config.getProperty(propertyKey);
+            
+            //support localization for configuration files
+            String clean = p.trim();
+            if(clean.startsWith("$(") && clean.endsWith(")")){
+                clean = clean.substring(2, clean.length()-1);
+                p = Resources.$(clean);
+            }
+            
+            return p;
         }
         return propertyKey;
     }

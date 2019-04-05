@@ -19,6 +19,7 @@ package japps.ui.component;
 import japps.ui.DesktopApp;
 import japps.ui.component.action.AbstractKeyListener;
 import japps.ui.component.action.AbstractMouseListener;
+import japps.ui.component.action.TransferActionListener;
 import japps.ui.util.Resources;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -32,10 +33,15 @@ import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
 
 /**
  *
  * @author Williams Lopez - JApps
+ * @param <T>
  */
 public class ComboBox<T> extends ComponentField<T>{
     
@@ -45,7 +51,7 @@ public class ComboBox<T> extends ComponentField<T>{
     private Popup popup;
     private Panel panel;
     private Panel popupMainPanel;
-    private ActionListener action;
+   
     private TextField textField;
     private TextField textFieldSearch;
     private Button button;
@@ -54,6 +60,8 @@ public class ComboBox<T> extends ComponentField<T>{
     private T value;
     private int maxDisplayedValues = 100;
     private Label statusLabel;
+    private boolean searchable;
+    private Button btnDelete;
 
     
     public static int ROW=1;
@@ -66,7 +74,7 @@ public class ComboBox<T> extends ComponentField<T>{
      * @param searchable true to add a search fiel to this combobox
      */
     public ComboBox(boolean searchable){
-        
+        this.searchable = searchable;
         Label iconSearch = new Label();
         panel = new Panel();
         textField = new TextField();
@@ -78,11 +86,16 @@ public class ComboBox<T> extends ComponentField<T>{
         button = new Button();
         button.addActionListener((e)->{ showPopup(); });
         button.setImage(Resources.icon("expand-more.png"),20,20);
-        button.setBorder(null);
+        button.setBorder(BorderFactory.createEmptyBorder());
         iconSearch.setImage(Resources.icon("search.png"),15,15);
         textFieldSearch.addKeyListener(new AbstractKeyListener(){
             public void keyReleased(KeyEvent e) { filter(textFieldSearch.getValue()); }
         });
+        
+        btnDelete = new Button();
+        btnDelete.setImage(Resources.icon("delete.png"),15,15);
+        btnDelete.setSize(20, 20);
+        btnDelete.addActionListener((e)->{ setValue(null); });
         
         textField.setEditable(false);
         textField.setBorder(BorderFactory.createEmptyBorder());
@@ -110,7 +123,9 @@ public class ComboBox<T> extends ComponentField<T>{
 
         panel.setBorder(BorderFactory.createEmptyBorder());
         popup.setMainPanel(popupMainPanel);
+        popup.setBorder(new RoundedBorder(popup));
         
+        this.add(btnDelete);
         this.add(textField);
         this.add(button);
         this.setFilter((k,v)->{ 
@@ -119,7 +134,14 @@ public class ComboBox<T> extends ComponentField<T>{
         });
         
         
-        
+        TransferActionListener transferableListener = new TransferActionListener(this);
+
+        this.textField.addFocusListener(transferableListener);
+        this.textField.addKeyListener(transferableListener);
+        this.textField.addMouseListener(transferableListener);
+        this.textField.addMouseMotionListener(transferableListener);
+        this.textField.addMouseWheelListener(transferableListener);
+
     }
 
     
@@ -171,6 +193,18 @@ public class ComboBox<T> extends ComponentField<T>{
     }
     
     
+    public void setCleanButtonVisible(boolean visible){
+        Component c = this.getComponent(0);
+        if(visible){
+            if(c != btnDelete) add(btnDelete,0);
+        }else{
+            if(c == btnDelete) remove(0);
+        }
+        revalidate();
+        repaint();
+    }
+    
+    
     /**
      * Set the view mode, ROW or TABLE
      * @param i 
@@ -199,7 +233,11 @@ public class ComboBox<T> extends ComponentField<T>{
             ComboBoxItem item = new ComboBoxItem();
             item.id = id;
             item.value = v;
-            item.component = new Button(v.toString(), (e)->{ popup.setVisible(false); setValue(v); if(action!=null) action.actionPerformed(e); });
+            item.component = new Button(v.toString(), (e)->{ 
+                popup.setVisible(false); 
+                setValue(v); 
+                fireActionListener(new ActionEvent(this, 0, "selected"));
+            });
             items.add(item);
             id++;
         }
@@ -218,7 +256,7 @@ public class ComboBox<T> extends ComponentField<T>{
     @Override
     public void setValue(T value) {
         this.value = value;
-        this.textField.setValue(value.toString());
+        this.textField.setValue(value==null?"":value.toString());
     }
 
     @Override
@@ -247,21 +285,6 @@ public class ComboBox<T> extends ComponentField<T>{
         return button.isEnabled();
     }
 
-    /**
-     * Get the action
-     * @return 
-     */
-    public ActionListener getAction() {
-        return action;
-    }
-
-    /**
-     * Set the action
-     * @param action 
-     */
-    public void setAction(ActionListener action) {
-        this.action = action;
-    }
 
     /**
      * Get the filter
@@ -304,9 +327,12 @@ public class ComboBox<T> extends ComponentField<T>{
      */
     private void showPopup(){
         this.organizeElements(items);
+        this.panel.setMinimumSize(new Dimension(getWidth(), 25));
         this.popup.pack();
         this.popup.show(this, 0, this.getHeight());
-        SwingUtilities.invokeLater(()->{ this.textFieldSearch.requestFocus(); });
+        if(this.searchable){
+            SwingUtilities.invokeLater(()->{ this.textFieldSearch.requestFocus();});
+        }
     }
     
     /**
@@ -323,9 +349,52 @@ public class ComboBox<T> extends ComponentField<T>{
         }
         this.organizeElements(filtered);
         this.popup.pack();
-        SwingUtilities.invokeLater(()->{ this.textFieldSearch.requestFocus(); });
+        SwingUtilities.invokeLater(()->{ this.textFieldSearch.requestFocus();});
+        
+    }
+    
+    /**
+     * Adds an action listener to this component, action listener in combobox is launched when an element in 
+     * combobox is selected
+     * @param l 
+     */
+    public void addActionListener(ActionListener l){
+        listenerList.add(ActionListener.class, l);
+    }
+    
+    /**
+     * Removes an ActionListener
+     * @param l 
+     */
+    public void removeActionListener(ActionListener l){
+        listenerList.remove(ActionListener.class, l);
+    }
+    
+    /**
+     * Get all ActionListener in this component
+     * @return 
+     */
+    public ActionListener[] getActionListener(){
+        return listenerList.getListeners(ActionListener.class);
+    }
+    
+    /**
+     * Fire all action listener in this component
+     * @param e 
+     */
+    public void fireActionListener(ActionEvent e){
+        ActionListener[] ls = getActionListener();
+        if(ls== null)return; 
+        for(ActionListener l: ls){
+            l.actionPerformed(e);
+        }
     }
 
+    @Override
+    public void setToolTipText(String text) {
+        textField.setToolTipText(text);
+        super.setToolTipText(text);
+    }
     
     
     
