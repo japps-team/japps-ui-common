@@ -37,14 +37,13 @@ import javax.swing.JScrollPane;
  */
 public class AccordionPanel extends JScrollPane implements IComponent{
     
-    private JComponent main;
-    private Image iconGroupNoExpanded;
-    private Image iconGroupExpanded;
-    private List<Group> groups;
+    private final JComponent main;
+    private final Image iconGroupNoExpanded;
+    private final Image iconGroupExpanded;
+    private final List<Group> groups;
     
 
     public AccordionPanel() {
-        
         groups = new ArrayList<>();
         iconGroupNoExpanded = Resources.icon("arrow-keyboard-right.png",20,20);
         iconGroupExpanded  = Resources.icon("arrow-down-keyboard.png",20,20);
@@ -53,11 +52,10 @@ public class AccordionPanel extends JScrollPane implements IComponent{
         main.setLayout(box);
         setViewportView(main);
         getViewport().setBackground(Color.white);
-        setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        
         main.add(new Panel());
-        
     }
     
     /**
@@ -70,7 +68,6 @@ public class AccordionPanel extends JScrollPane implements IComponent{
         main.add(group,main.getComponentCount()-1);
         groups.add(group);
         group.setExpanded(false);
-        
         repaint();
     }
     
@@ -94,53 +91,7 @@ public class AccordionPanel extends JScrollPane implements IComponent{
      * @see Panel
      */
     public void addGroup(String title, Component[][] comps, String[] colConst, String[] rowConst){
-        //Calculating height
-        
-        Panel panel = new Panel() {
-            /*
-            @Override
-            public Dimension getPreferredSize() {
-                int height = 0;
-                int extra = 10;
-                for (Component[] r : comps) {
-                    int maxrowheight = 0;
-                    for (Component c : r) {
-                        if (c != null && c.getPreferredSize().height > maxrowheight) {
-                            maxrowheight = c.getPreferredSize().height;
-                        }
-                    }
-                    extra += 2;
-                    height += maxrowheight;
-                }
-                if(height>0){
-                    return new Dimension(AccordionPanel.this.getWidth()-AccordionPanel.this.getInsets().left-AccordionPanel.this.getInsets().right-5, height+extra);
-                }
-                
-                return super.getPreferredSize();
-            }
-
-            @Override
-            public Dimension getMaximumSize() {
-                return getPreferredSize();
-            }
-
-            @Override
-            public Dimension getMinimumSize() {
-                return getPreferredSize();
-            }
-
-            @Override
-            public Dimension getSize() {
-                return getPreferredSize();
-            }
-            
-            
-            
-            
-            */
-        };
-
-        
+        Panel panel = new Panel();
         if(colConst==null || rowConst == null){
             panel.setComponents(comps);
         }else{
@@ -169,15 +120,12 @@ public class AccordionPanel extends JScrollPane implements IComponent{
         main.remove(g);
     }
 
-    
     /**
-     * Expand all groups
-     * @param expanded 
+     * Get accordion Pane groups
+     * @return 
      */
-    public void setExpanded(boolean expanded){
-        for(Group g:groups){
-            g.setExpanded(expanded);
-        }
+    public List<AccordionPanel.Group> getGroups(){
+        return groups;
     }
     
     /**
@@ -212,7 +160,7 @@ public class AccordionPanel extends JScrollPane implements IComponent{
     /**
      * An internal group compoennt
      */
-    class Group extends JComponent{
+    public class Group extends JComponent{
         String title;
         ToggleButton header;
         Component container;
@@ -234,12 +182,9 @@ public class AccordionPanel extends JScrollPane implements IComponent{
             setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
             add(header);
             add(container);
-
-            
-            
         }
         
-        private void setExpanded(boolean expanded){
+        public void setExpanded(boolean expanded){
             Image image = expanded?iconGroupExpanded:iconGroupNoExpanded;
             header.setImage(image);
             this.container.setVisible(expanded);

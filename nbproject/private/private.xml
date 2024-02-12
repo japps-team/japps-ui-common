@@ -3,21 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/util/Resources.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/RoundedBorder.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/ElementList.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/SelectionGroup.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/ComboBox.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/OrderElementsField.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/config/ComponentBuilder.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/IComponent.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/DesktopApp.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Panel.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Label.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/ToggleButton.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Button.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/Dialogs.java</file>
-            <file>file:/home/fernando/NetBeansProjects/japps-ui-common/src/japps/ui/component/TextField.java</file>
+            <file>file:/C:/usr/japps-ui-common-master/src/japps/ui/component/Dialogs.java</file>
+            <file>file:/C:/usr/japps-ui-common-master/src/japps/ui/component/ComboBox.java</file>
+            <file>file:/C:/usr/japps-ui-common-master/src/japps/ui/component/Button.java</file>
         </group>
     </open-files>
 </project-private>

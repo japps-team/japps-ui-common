@@ -87,6 +87,37 @@ public class Panel extends JComponent implements japps.ui.component.IComponent, 
         setComponents(comps, colConstraints,rowConstraints);
         revalidate();
     }
+    
+    
+    /**
+     * Set the components in this Panel.<br/>
+     * 
+     * You can add a column or row constraint and it can be applyied to every cell.<br/>
+     * 
+     * @param comps
+     * @param columnConstraint
+     * @param rowConstraint 
+     */
+    public void setComponents(Component[][] comps, String columnConstraint, String rowConstraint){
+        
+        String[] rows = new String[comps.length];
+        String[] cols = new String[comps[0].length];
+        
+        if (rowConstraint != null) {
+            for (int i=0;i<rows.length;i++) {
+                rows[i]=rowConstraint; 
+            }
+        }
+        if (columnConstraint != null) {
+            for (int i=0;i<cols.length;i++) {
+                cols[i]=columnConstraint; 
+            }
+        }
+        
+        setComponents(comps, cols, rows);
+        
+    }
+    
 
     /**
      * Set the components in this Panel<br/>
@@ -106,7 +137,7 @@ public class Panel extends JComponent implements japps.ui.component.IComponent, 
      * <br/>
      * rowConstraint[0] = Panel.NONE<br/>
      * rowConstraint[1] = Panel.FILL_GROW_CENTER<br/>
-     * rowConstraint[2] = "width 10:20:40".<br/>
+     * rowConstraint[2] = "width 10:20:40" (min:preferred:max), or height.<br/>
      * 
      * @param comps
      * @param columnConstraints 
@@ -128,6 +159,8 @@ public class Panel extends JComponent implements japps.ui.component.IComponent, 
             }
         }
 
+        System.out.println("sc:"+sc);
+        System.out.println("sr:" +sr);
 
         setLayout(new MigLayout("insets 5", sc, sr));
 

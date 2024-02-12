@@ -16,7 +16,6 @@
  */
 package japps.ui;
 
-import japps.ui.component.Label;
 import static japps.ui.util.Resources.*;
 import japps.ui.util.Log;
 import java.awt.Color;
@@ -25,17 +24,12 @@ import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -48,7 +42,6 @@ public class DesktopApp{
     private JComponent mainPanel;
     private boolean fullscreen = false;
    
-    private JDialog messageDialog;
     
     /**
      * Constructs a DesktopApp
@@ -70,7 +63,7 @@ public class DesktopApp{
      * Sets wether this app is fullscreen or not
      * @param fullscreen 
      */
-    public void setFullscreen(boolean fullscreen){
+    public final void setFullscreen(boolean fullscreen){
         this.fullscreen = fullscreen;
         if(this.fullscreen){
             mainWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
@@ -98,8 +91,8 @@ public class DesktopApp{
             }else{
                 UIManager.setLookAndFeel(lf);
             }
-        } catch (Throwable e) {
-            Log.debug("Error al colocar el look and feel", e);
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+            Log.error("Error al colocar el look and feel", e);
         }
         
         APP = new DesktopApp();
@@ -112,7 +105,7 @@ public class DesktopApp{
      */
     public static void start(JComponent mainPanel){
         APP.setMainPanel(mainPanel);
-        APP.mainWindow.pack();
+        //APP.mainWindow.pack();
 
         SwingUtilities.invokeLater(()->{
             APP.mainWindow.setVisible(true);

@@ -19,37 +19,21 @@ package japps.ui.config;
 
 import japps.ui.DesktopApp;
 import japps.ui.component.Button;
-import japps.ui.component.ComboBox;
-import japps.ui.component.ComponentField;
-import japps.ui.component.DateField;
 import japps.ui.component.Dialogs;
-import japps.ui.component.FileField;
 import japps.ui.component.Label;
-import japps.ui.component.OrderElementsField;
 import japps.ui.component.Panel;
-import japps.ui.component.Popup;
 import japps.ui.component.RoundedBorder;
-import japps.ui.component.TextField;
-import japps.ui.component.ToggleButton;
 import japps.ui.util.Log;
 import japps.ui.util.Resources;
 import java.awt.Component;
 import static japps.ui.util.Resources.p;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -262,7 +246,7 @@ public class PObjectEditor extends Panel {
             }else{
                 message += ": "+ err.getMessage();
             }
-            Log.debug(message, err);
+            Log.error(message, err);
         }
         Dialogs.error(Resources.$("Input error"), Resources.$("Input validation error for:")+"\n"+message);
         return false;

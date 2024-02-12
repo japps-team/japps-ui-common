@@ -101,7 +101,7 @@ public class PInfo {
                     pinfo.defaultValue = Resources.$(arrayInfo[5].trim());
                 }
             } catch (Throwable err) {
-                Log.debug("Error parsing property info  "+pinfo.property+" - "+info, err);
+                Log.error("Error parsing property info  "+pinfo.property+" - "+info, err);
             }
 
             return pinfo;

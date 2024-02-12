@@ -18,11 +18,18 @@ package japps.ui.util;
 
 import java.awt.Image;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import javax.imageio.ImageIO;
@@ -36,7 +43,9 @@ public class Util {
     /**
      * Date format for show to users
      */
-    public static SimpleDateFormat localeDateFormat = new SimpleDateFormat("dd MMM yyyy hh:mm aa", Locale.getDefault());
+    public static SimpleDateFormat localeDateFormat;
+    public static DateTimeFormatter localDateTimeFormatter;
+    public static DateTimeFormatter localDateFormatter;
     /**
      * Date format for application internal
      */
@@ -48,7 +57,34 @@ public class Util {
      * @return 
      */
     public static String dateToLocaleString(Date date){
+        if(localeDateFormat == null){
+             localeDateFormat = new SimpleDateFormat(Resources.p("app.datetime.format"), Locale.getDefault());
+        }
         return localeDateFormat.format(date);
+    }
+    
+    /**
+     * Converts the date object to string in a format for user
+     * @param date
+     * @return 
+     */
+    public static String dateToLocaleString(LocalDateTime date){
+        if(localDateTimeFormatter == null){
+            localDateTimeFormatter =  java.time.format.DateTimeFormatter.ofPattern(Resources.p("app.datetime.format"));
+        }
+        return localDateTimeFormatter.format(date);
+    }
+    
+    /**
+     * Converts the date object to string in a format for user
+     * @param date
+     * @return 
+     */
+    public static String dateToLocaleString(LocalDate date){
+        if(localDateFormatter == null){
+            localDateFormatter =  java.time.format.DateTimeFormatter.ofPattern(Resources.p("app.date.format"));
+        }
+        return localDateFormatter.format(date);
     }
     
     /**
@@ -76,7 +112,7 @@ public class Util {
         process.waitFor();
         InputStream is = process.getInputStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        int c = -1;
+        int c;
         while ((c = is.read()) > 0) {
             os.write(c);
         }
@@ -121,8 +157,33 @@ public class Util {
     public static Image readImage(Path path){
         try {
             return ImageIO.read(path.toUri().toURL());
-        } catch (Exception e) {
-            Log.debug("Error reading image "+path,e);
+        } catch (IOException e) {
+            Log.error("Error reading image "+path,e);
+        }
+        return null;
+    }
+    
+    /**
+     * Creates a unique hash id based on data and time
+     * @param data
+     * @return 
+     */
+    public static String createUniqueHashId(String data){
+        String input = Calendar.getInstance().getTimeInMillis()+data; 
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(input.getBytes());
+            byte[] hashBytes = md.digest();
+            byte[] truncatedHashBytes = new byte[16];
+            System.arraycopy(hashBytes, 0, truncatedHashBytes, 0, truncatedHashBytes.length);
+            StringBuilder hashString = new StringBuilder();
+            for (byte b : truncatedHashBytes) {
+                hashString.append(String.format("%02x", b));
+            }
+            return hashString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
         return null;
     }

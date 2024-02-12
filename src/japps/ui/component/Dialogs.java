@@ -53,6 +53,7 @@ public class Dialogs {
      * @param content Component to show
      * @param title
      * @param modal
+     * @param closingAction
      * @return 
      */
     public static JDialog create(JComponent content, String title,boolean modal, ActionListener closingAction){

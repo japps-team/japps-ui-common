@@ -16,30 +16,14 @@
  */
 package japps.ui.component;
 
-import japps.ui.component.action.DropActionListener;
 import japps.ui.component.action.TransferActionListener;
-import japps.ui.util.Log;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.EventListener;
-import java.util.EventObject;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPasswordField;
@@ -48,7 +32,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.JTextComponent;
-import sun.font.FontManagerFactory;
 
 /**
  *

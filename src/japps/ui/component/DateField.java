@@ -27,9 +27,9 @@ import org.jdatepicker.JDatePicker;
 /**
  *
  * @author Williams Lopez - JApps
- * @param <Date>
+ * @param <D>
  */
-public class DateField<Date> extends ComponentField{
+public class DateField<D> extends ComponentField{
     
     JDatePicker picker;
     
@@ -56,13 +56,13 @@ public class DateField<Date> extends ComponentField{
 
     @Override
     public void setValue(Object value) {
-        DateModel<Date> model = (DateModel<Date>)this.picker.getModel();
-        model.setValue((Date)value);
+        DateModel<D> model = (DateModel<D>)this.picker.getModel();
+        model.setValue((D)value);
     }
 
     @Override
-    public Date getValue() {
-        return (Date)this.picker.getModel().getValue();
+    public D getValue() {
+        return (D)this.picker.getModel().getValue();
     }
 
     @Override

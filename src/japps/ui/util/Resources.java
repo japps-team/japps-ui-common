@@ -18,22 +18,34 @@ package japps.ui.util;
 
 
 
-import japps.ui.component.Dialogs;
+import java.awt.Font;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 /**
+ * 
+ * Class to manage resource files like, configuration properties, language texts, icons, etc.
  *
  * @author Williams Lopez - JApps
  */
@@ -46,32 +58,152 @@ public class Resources {
     private static Map<String,Image> iconCache;
     
     
-    
-    public static Path getUserAppPath() throws IOException{
+    /**
+     * Get the user resource path
+     * @return
+     * @throws IOException 
+     */
+    public static Path getUserAppPath() throws IOException {
         Path userAppPath = Paths.get(System.getProperty("user.home"), ".japps", appName);
         Path homeResources = userAppPath.resolve("res");
 
         if (!Files.exists(homeResources)) {
-            Log.debug("Creationg userAppPath: "+userAppPath);
-            Path sharedConfigDir = Paths.get("res");
-            if (!Files.exists(sharedConfigDir)) {
-                try {
-                    Log.debug("You have not defined a res directory, creating");
-                    Path resJar = Paths.get(Resources.class.getResource("/res").toURI());
-                    Path resDir = Paths.get("res").toAbsolutePath().getParent();
-                    Files.createDirectories(resDir);
-                    FileUtils.copy(resJar, resDir);
-                    
-                } catch (Throwable err) {
-                    Log.debug("Cant copy, inJar files",err);
-                }
+            Log.debug("First time execution. No configuration files found in .japps folder: " + userAppPath);
+            try {
+                //copy default japps libraries embedded resource folder
+                Files.createDirectories(userAppPath);
+                String defaultResources = "/res_default";
+                Log.debug("Copying default configuration files from "+defaultResources+" to "+userAppPath.resolve("res"));
+                extractResourcesInClasspathFolder(defaultResources, userAppPath.resolve("res"));
+                
+                //copy custom resource folder
+                //Path localResources = Paths.get("res");
+                String customResources = "/res";
+                Log.debug("Copying specific configuration files from "+customResources+" to "+userAppPath.resolve("res"));
+                extractResourcesInClasspathFolder(customResources, userAppPath.resolve("res"));
+            } catch (IOException err) {
+                Log.error("Cant copy, inJar files", err);
             }
-            Log.debug("Resources files does not exists, copying...");
-            FileUtils.copy(sharedConfigDir, userAppPath);
+        }
+        return userAppPath;
+    }
+    
+    
+    /**
+     * Find a resource in classpath
+     * @param resourcePath
+     * @return 
+     */
+    public static URL findResource(String resourcePath) {
+        Log.debug("Looking up resources: " + resourcePath);
+        URL resourceURL = Resources.class.getResource(resourcePath);
+        return resourceURL;
+    }
+    
+    /**
+     * Extracts all files and directries inside a folder in java classpath to a normal folder in file system
+     * @param from java folder inside jar
+     * @param to folder in file system
+     */
+    public static void extractResourcesInClasspathFolder(String from, Path to){
+        //Log.debug("Copying file (jar)"+from+" to "+to);
+        URL resource = Resources.class.getResource(from);
+        Log.debug("Source: "+resource);
+        if(resource == null){
+            return;
+        }
+        
+        String log = "";
+        
+        //This is for developer environment in IDE like Netbeans or Eclipse
+        //where classpath is not packaged in a jar
+        try {
+            log += "Validating whether is a JAR or not.";
+            if (Files.exists(Paths.get(resource.toURI()))) {
+                FileUtils.copy(Paths.get(resource.toURI()), to);
+                return;
+            }
+        } catch (FileSystemNotFoundException e) {
+            log += ". It is a JAR";
+        } catch (URISyntaxException | IOException ex) {
+            log += ". Error extracting resources from " + from + " to " + to+": "+ex.getMessage();
+        }
+        
+        Log.debug(log);
+        
+        //Copy from packaged jar
+        try {
+            extractResourceFolderFromJar(from, to);
+        } catch (IOException | URISyntaxException ex) {
+            Log.error("Error extracting folder resources: "+from+" to "+to, ex);
+        }
+        
+        
+    }
+    
+    public static void extractResourceFolderFromJar(String resFolder, Path destFolder) throws MalformedURLException, URISyntaxException, IOException {
+       
+        if(resFolder.endsWith("/")){
+            resFolder = resFolder.substring(0, resFolder.length()-1);
+        }
+        
+        URL r = Resources.class.getResource(resFolder);
+        if (r == null || r.getFile() == null) {
+            return;
         }
 
-        return userAppPath;
-    }    
+        String jarPath = r.getFile().substring(0, r.getFile().indexOf('!'));
+
+        //Creamos el folder destino
+        Files.createDirectories(destFolder);
+
+        URL u = new URL(jarPath);
+        Path p = Paths.get(u.toURI());
+        JarInputStream jis = new JarInputStream(Files.newInputStream(p));
+        JarEntry je;
+        while ((je = jis.getNextJarEntry()) != null) {
+            
+            String pathInJar = "/" + je.getName();
+            
+            if (!(pathInJar).startsWith(resFolder)) {
+                continue;
+            }
+            
+            String relativePath = pathInJar.substring(resFolder.length()+1);
+            relativePath = relativePath.replaceAll("[/]+", "\\"+File.separator);
+            Path newPath = destFolder.resolve(relativePath);
+            //if it is folder
+            if (je.getName().endsWith("/")) {
+                Files.createDirectories(newPath);
+            } else {
+                if(!Files.exists(newPath.getParent())){
+                    Files.createDirectories(newPath.getParent());
+                }
+                Files.copy(jis, newPath);
+            }
+
+        }
+
+    }
+
+
+    /**
+     * Get user configuration path for this application
+     * @return
+     * @throws IOException 
+     */
+    public static Path getConfigPath() throws IOException{
+        return getUserAppPath().resolve("res").resolve("config").toAbsolutePath();
+    }
+    
+    /**
+     * Get user text languages path for this user
+     * @return
+     * @throws IOException 
+     */
+    public static Path getLangPath() throws IOException{
+        return getUserAppPath().resolve("res").resolve("lang").toAbsolutePath();
+    }
     
     
     /**
@@ -80,16 +212,13 @@ public class Resources {
      * @return 
      */
     public static String $(String textKey){
-        
         if(textKey == null){
             return null;
         }
-        
         String clean = textKey.trim();
         if(clean.startsWith("$(") && clean.endsWith(")")){
             textKey = clean.substring(2, clean.length()-1);
         }
-        
         if(lang.containsKey(textKey)){
             return lang.getProperty(textKey);
         }
@@ -99,29 +228,28 @@ public class Resources {
     /**
      * Find a property in the config files
      * @param propertyKey
-     * @return
-     * @throws Exception 
+     * @return 
      */
     public static String p(String propertyKey){
+        if(config == null){
+            throw new RuntimeException("You must place DestopApp.init function before use japps properties");
+        }
         if(config.containsKey(propertyKey)){
-            
             String p = config.getProperty(propertyKey);
-            
             //support localization for configuration files
             String clean = p.trim();
             if(clean.startsWith("$(") && clean.endsWith(")")){
                 clean = clean.substring(2, clean.length()-1);
                 p = Resources.$(clean);
             }
-            
             return p;
         }
-        return propertyKey;
+        return null;
     }
     
     /**
      * Get an Image in classpath
-     * @param iconName
+     * @param imageName
      * @return 
      */
     public static Image icon(String imageName){
@@ -129,9 +257,7 @@ public class Resources {
             if(iconCache == null){
                 iconCache = new HashMap<>();
             }
-            
-            Image img = null;
-            
+            Image img;
             if(iconCache.containsKey(imageName)){
                 img = iconCache.get(imageName);
             }else{
@@ -140,10 +266,9 @@ public class Resources {
                 img = ImageIO.read(url);
                 iconCache.put(imageName, img);
             }
-            
             return img;
-        }catch(Throwable err){
-            Log.debug("Error al buscar el icono: "+imageName, err);
+        }catch(IOException err){
+            Log.error("Error al buscar el icono: "+imageName, err);
         }
         return null;
     }
@@ -178,6 +303,7 @@ public class Resources {
     /**
      * Speech a text
      * @param text 
+     * @param showWindow 
      */
     public static void speech(String text, boolean showWindow) {
         try {
@@ -244,7 +370,7 @@ public class Resources {
             return wavFile;
             
         }catch(Exception err){
-            Log.debug("Error getting the speech for: "+text,err);
+            Log.error("Error getting the speech for: "+text,err);
         }
         return null;
     }
@@ -252,10 +378,10 @@ public class Resources {
     /**
      * Load all resources
      * @param _appName
-     * @param args 
+     * @param args  
      */
     public static void load(String _appName,String[] args){
-        appName = _appName;
+        Resources.appName = _appName;
         processOptions(args);
         loadConfig();
         loadLang();
@@ -271,15 +397,15 @@ public class Resources {
             switch(args[0]){
                 case "reconfigure":
                     try{
-                        FileUtils.deleteFileOrDirectory(Paths.get(System.getProperty("user.home"), ".japps", appName,"res"));
+                        FileUtils.deleteFileOrDirectory(Paths.get(System.getProperty("user.home"), ".japps", appName));
                     }catch(Exception err){
-                        Log.debug("Cant delete directory "+Paths.get(System.getProperty("user.home"), ".japps", appName,"res"), err);
+                        Log.error("Cant delete directory "+Paths.get(System.getProperty("user.home"), ".japps", appName), err);
                     }
                     break;
             }
         }
         }catch(Exception err){
-            Log.debug("Error al procesar los argumentos",err);
+            Log.error("Error al procesar los argumentos",err);
         }
     }
     
@@ -287,29 +413,11 @@ public class Resources {
      * Load all configuration files
      */
     private static void loadConfig(){
-        
-        
-        
         try{
-            
-            Path userAppPath = getUserAppPath();
-                     
             config = new Properties();
-            
-            Log.debug("Loading jar:/res/config/default.properties file");
-            config.load(Resources.class.getResourceAsStream("/res/config/default.properties"));
-            
-            Files.list(userAppPath.resolve("res").resolve("config")).forEach((p)->{
-                try {
-                    Log.debug("Loading "+p+" file");
-                    config.load(Files.newInputStream(p));
-                } catch (IOException ex) {
-                    Log.debug("Cant load configuration file: "+ p, ex);
-                }
-            });
-
-        }catch(Throwable err){
-            Log.debug("Error loading configuration files ", err);
+            Resources.loadPropertiesFiles(getConfigPath(), config);
+        }catch(IOException err){
+            Log.error("Error loading configuration files ", err);
         }
     }
     
@@ -319,53 +427,20 @@ public class Resources {
     private static void loadLang() {
         try{
             
-            Path userAppPath = getUserAppPath();
-            
             String language  = p("app.language");
-            
             if(language.equalsIgnoreCase("default")){
                 language = Locale.getDefault().getLanguage();
             }
-            
             lang = new Properties();
+            //next load language specific folder
+            Resources.loadPropertiesFiles(getLangPath().resolve(language), lang);
             
-            Log.debug("Loading default lang files");
-            Resources.loadPropertiesInClasspath("/res/lang",lang);
-            Log.debug("Loading default locale lang files: " + language);
-            Resources.loadPropertiesInClasspath("/res/lang/"+language, lang);
-            
-            Log.debug("Loading app default lang files");
-            Resources.loadPropertiesFiles(userAppPath.resolve("res").resolve("lang"), lang);
-            
-            Log.debug("Loading app default lang files");
-            Path lp = userAppPath.resolve("res").resolve("lang").resolve(language);
-            if(!Files.exists(lp)){
-                Files.createDirectories(lp);
-            }
-            Resources.loadPropertiesFiles(lp, lang);
-            
-            
-        }catch(Exception err){
-            err.printStackTrace();
+        }catch(IOException err){
+            Log.error("Cant load lang files", err);
         }
     }
     
-    /**
-     * Load all properties inside a package in classpath
-     * @param pack
-     * @param props
-     * @throws Exception 
-     */
-    private static void loadPropertiesInClasspath(String pack, Properties props){
-        try{
-            URL packurl = Util.class.getResource(pack);
-            File file = new File(packurl.toURI());
-            Path path = file.toPath();
-            loadPropertiesFiles(path, props);
-        }catch(Exception e){
-            Log.debug("Cant load properties package: "+pack, e);
-        }
-    }
+
     
     /**
      * Load all properties inside a package in classpath
@@ -375,14 +450,31 @@ public class Resources {
      */
     private static void loadPropertiesFiles(Path path, Properties props) {
         try{
+            
+            Log.debug("Loading folder: "+path);
+            
+            if(!Files.exists(path)){
+                Log.debug("Fileo "+path+" does not exist");
+            }
+            
+            //first load default.properties
+            Path def = path.resolve("default.properties");
+            if(Files.exists(def)){
+                Log.debug("Loading file: "+def);
+                props.load(Files.newInputStream(def));
+            }
+            
+            //next load every .properties file
             List<String> files=FileUtils.listFilesInPath(path);
                 for(String f: files){
+                    Log.debug("Loading file: "+f);
                     if(!f.endsWith(".properties")) continue;
+                    if(f.equals("default.properties")) continue;
                     URL propertiesFile = path.resolve(f).toUri().toURL();
                     props.load(propertiesFile.openStream());
                 }
         }catch(Exception e){
-            Log.debug("Cant load properties file: "+path, e);
+            Log.error("Cant load properties file: "+path, e);
         }
     }
     
@@ -392,6 +484,20 @@ public class Resources {
      */
     public static Properties getConfigProperties(){
         return config;
+    }
+    
+    
+    public static Font getDefaultFont(){
+        String strfont = p("app.font");
+        Font f = null;
+        try {
+            f = Font.decode(strfont);
+        } catch (Exception e) {
+        }
+        if(f == null){
+            f = new Font("Arial", Font.PLAIN, 14);
+        }
+        return f;
     }
     
     

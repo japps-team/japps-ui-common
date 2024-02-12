@@ -18,11 +18,9 @@ package japps.ui.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,28 +31,35 @@ import java.util.stream.Collectors;
 public class FileUtils {
     
     /**
-     * Copy a file or directory into a pathTo directory, if pathTo does not exists, it will be created
-     * @param from File or directory to be copied
-     * @param pathTo Path to put the file or directory
+     * Copy a file or directory to the specified pathTo, if pathTo does not exists, it will be created
+     * @param from to or directory to be copied
+     * @param to
      * @throws IOException 
      */
-    public static void copy(Path from, Path pathTo) throws IOException{
-        
-        Path target = pathTo.toAbsolutePath().resolve(from.getFileName());
+    public static void copy(Path from, Path to) throws IOException{
+        Log.debug("Copying "+from+" to "+to);
         if(Files.isDirectory(from)){
-            Files.createDirectories(target);
+            Files.createDirectories(to);
             Files.list(from).forEach( (p)-> { 
                 try{
-                    copy(p,target); 
+                    String name = p.toFile().getName();
+                    if(!name.equals(".") && 
+                       !name.equals("..")){
+                        copy(p,to.resolve(name)); 
+                    }
                 }catch(IOException err){
-                    Log.debug("Error copying file: "+p.toAbsolutePath()+" to "+target, err);
+                    Log.error("Error copying file: "+p.toAbsolutePath()+" to "+to, err);
                 }
             }  );
         }else{
             Log.debug("Copying file: "+from.toString());
-            Files.copy(from, target);
+            Files.copy(from, to,StandardCopyOption.REPLACE_EXISTING);
         }
     }
+    
+  
+    
+
     
     /**
      * Deletes a file or a directory recursively
@@ -73,14 +78,14 @@ public class FileUtils {
             }else{
                 Files.delete(path);
             }
-        }catch(Exception err){
-            Log.debug("Error al eliminar archivos",err);
+        }catch(IOException err){
+            Log.error("Error al eliminar archivos",err);
         }
     }
     
     /**
      * List all files in a package directory
-     * @param pack
+     * @param path
      * @return
      * @throws IOException 
      */
@@ -91,6 +96,7 @@ public class FileUtils {
                                  .collect(Collectors.toList());
         return files;
     }
+    
     
     
 }

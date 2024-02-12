@@ -16,10 +16,6 @@
  */
 package japps.ui.component;
 
-import japps.ui.DesktopApp;
-import japps.ui.util.Resources;
-import japps.ui.util.Util;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;

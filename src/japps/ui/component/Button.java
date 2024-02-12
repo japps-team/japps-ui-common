@@ -26,13 +26,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.KeyStroke;
-import javax.swing.text.DefaultEditorKit;
 
 
 /**
@@ -99,12 +93,38 @@ public class Button extends Label{
 
             @Override
             public void focusGained(FocusEvent e) {
-                setBorder(BorderFactory.createLineBorder(Color.gray, 1, true));
+                //setBorder(BorderFactory.createLineBorder(Color.gray, 1, true));
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                setBorder(BorderFactory.createEmptyBorder());
+                //setBorder(BorderFactory.createEmptyBorder());
+            }
+        });
+        
+        this.addMouseListener(new AbstractMouseListener(){
+            
+            boolean opaque;
+            Color buttonColor=null;
+            Color highlightedColor = new Color(230, 247, 255);
+            
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Color cc = Button.this.getBackground();
+                if(cc != null){
+                    this.buttonColor = Button.this.getBackground();
+                    this.opaque = Button.this.isOpaque();
+                }
+                Button.this.setOpaque(true);
+                Button.this.setBackground(this.highlightedColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if(buttonColor !=null){
+                    Button.this.setBackground(buttonColor);
+                    Button.this.setOpaque(opaque);
+                }
             }
         });
         

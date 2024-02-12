@@ -242,7 +242,7 @@ public class PObject {
                 p = Paths.get(v);
             }
         } catch (Exception err) {
-            Log.debug("Error resolvin path: " + v, err);
+            Log.error("Error resolvin path: " + v, err);
         }
         System.out.println("Accessing path: " + p.toString());
         return p;
@@ -383,7 +383,7 @@ public class PObject {
                             maxChildIndex = index;
                         }
                     } catch (Exception e) {
-                        Log.debug("Error checking max List child index", e);
+                        Log.error("Error checking max List child index", e);
                     }
                     
                 }

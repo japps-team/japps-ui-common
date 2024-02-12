@@ -16,16 +16,12 @@
  */
 package japps.ui.component;
 
-import japps.ui.DesktopApp;
 import japps.ui.component.action.DropActionListener;
 import japps.ui.util.Dnd;
 import japps.ui.util.Resources;
-import japps.ui.util.Util;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.ActionListener;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;

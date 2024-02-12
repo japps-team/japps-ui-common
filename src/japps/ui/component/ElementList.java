@@ -26,7 +26,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JScrollPane;
 
 /**
- *
+ * This is a list of components
  * @author Williams Lopez - JApps
  */
 public class ElementList<T> extends ComponentField<T[][]>{
@@ -60,6 +60,7 @@ public class ElementList<T> extends ComponentField<T[][]>{
             @Override
             public Element build(Object element, int row, int col) {
                 Element label = new Element();
+                label.setElement(element);
                 label.setHorizontalAlignment(Label.CENTER);
                 label.setHorizontalTextPosition(Label.CENTER);
                 label.setVerticalAlignment(Label.CENTER);
@@ -244,8 +245,8 @@ public class ElementList<T> extends ComponentField<T[][]>{
     
     
     public static void main(String[] args) {
-        DesktopApp.init("test2", args);
-        Label label = new Label("Lado izquierdo");
+        DesktopApp.init("test", args);
+        Label label = new Label("Example");
         Panel panel = new Panel();
         ElementList list = new ElementList();
         
@@ -253,7 +254,7 @@ public class ElementList<T> extends ComponentField<T[][]>{
                 new String[]{Panel.FILL_GROW_CENTER},
                 new String[]{"30:30:30,"+Panel.FILL_GROW_CENTER,Panel.FILL_GROW_CENTER});
         
-        list.setValue(new Object[][]{{"uno"}});
+        list.setValue(new Object[][]{{"uno"},{"dos"},{"tres"}});
         DesktopApp.start(panel);
     }
     
